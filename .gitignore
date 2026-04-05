@@ -1,0 +1,44 @@
+# --- [컴파일 결과물 및 바이너리] ---
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.lib
+*.dll
+*.exp
+*.out
+*.app
+
+# --- [빌드 폴더] ---
+# Visual Studio, CMake 등 빌드 도구가 생성하는 폴더들
+[Bb]in/
+[Oo]bj/
+[Rr]elease/
+[Dd]ebug/
+x64/
+x86/
+build/
+out/
+
+# --- [IDE 설정 파일 (Visual Studio 등)] ---
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.VC.db
+*.VC.opendb
+
+# --- [CMake 관련] ---
+CMakeCache.txt
+CMakeFiles/
+CMakeSettings.json
+cmake-build-*/
+install/
+
+# --- [임시 및 로그 파일] ---
+*.log
+*.tlog
+*.lastbuildstate
+*.cache
+*.tmp
