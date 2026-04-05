@@ -4,46 +4,77 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
-#include <future>
 #include <windows.h>
+#include <future>
+#include "ThreadManager.h"
 
-#include "ConcurrentQueue.h"
-#include "ConcurrentStack.h"
-
-LockQueue<int32> q;
-LockFreeStack<int32> s;
-
-void Push()
+// 소수 구하기
+bool IsPrime(int number)
 {
-	while (true)
+	if(number <= 1)
 	{
-		int32 value = rand() % 100;
-		s.Push(value);
-
-		this_thread::sleep_for(10ms);
+		return false;
 	}
-}
-
-void Pop()
-{
-	while (true)
+	if (2 == number || 3 == number)
 	{
-		int32 data = 0;
-		if(s.TryPop(OUT data))
+		return true;
+	}
+
+	for (int i = 2; i < number; ++i)
+	{
+		if (0 == (number % i))
 		{
-			cout << data << endl;
+			return false;
 		}
 	}
+
+	return true;
 }
+
+int CountPrime(int start, int end)
+{
+	int count = 0;
+	for (int number = start; number <= end; ++number)
+	{
+		if(IsPrime(number))
+		{
+			++count;
+		}
+	}
+
+	return count;
+}
+
+// 1과 자기 자신으로만 나뉘면 그걸 소수라고 함.
 
 int main()
 {
-	thread t1(Push);
-	thread t2(Pop);
-	thread t3(Pop);
+	const int MAX_NUMBER = 10000;
+	// 1~MAX_NUMBER까지의 소수 개수
 
-	t1.join();
-	t2.join();
-	t3.join();
+	CountPrime(1, MAX_NUMBER);
+	vector<thread> threads;
+
+	int coreCount = thread::hardware_concurrency();
+	int jobCount = (MAX_NUMBER / coreCount) + 1;
+
+	atomic<int> primeCount = 0;
+	for (int i = 0; i < coreCount; ++i)
+	{
+		int start = i * jobCount + 1;
+		int end = min(MAX_NUMBER, (i + 1) * jobCount);
+
+		threads.push_back(thread([start, end, &primeCount]()
+			{
+				primeCount += CountPrime(start, end);
+			}));
+	}
+
+	for (thread& t : threads)
+	{
+		t.join();
+	}
+
+	cout << primeCount << endl;
 }
 

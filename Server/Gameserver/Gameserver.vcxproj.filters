@@ -15,14 +15,10 @@
     <ClCompile Include="pch.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="ConcurrentQueue.cpp" />
-    <ClCompile Include="ConcurrentStack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="ConcurrentQueue.h" />
-    <ClInclude Include="ConcurrentStack.h" />
   </ItemGroup>
 </Project>
