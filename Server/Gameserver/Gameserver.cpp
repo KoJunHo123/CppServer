@@ -7,74 +7,70 @@
 #include <windows.h>
 #include <future>
 #include "ThreadManager.h"
+#include "RefCounting.h"
 
-// 소수 구하기
-bool IsPrime(int number)
+
+class Wraith : public RefCountable
 {
-	if(number <= 1)
+public:
+	int Hp = 150;
+	int PosX = 0;
+	int PosY = 0;
+};
+using WraithRef = TSharedPtr<Wraith>;
+
+class Missile : public RefCountable
+{
+public:
+	void SetTarget(WraithRef target)
 	{
+		Target = target;
+	}
+
+	bool Update()
+	{
+		if (nullptr == Target)
+		{
+			return true;
+		}
+
+		int posX = Target->PosX;
+		int oisY = Target->PosY;
+
+		if (0 == Target->Hp)
+		{
+			Target = nullptr;
+			return true;
+		}
 		return false;
 	}
-	if (2 == number || 3 == number)
-	{
-		return true;
-	}
 
-	for (int i = 2; i < number; ++i)
-	{
-		if (0 == (number % i))
-		{
-			return false;
-		}
-	}
+	WraithRef Target = nullptr;
+};
 
-	return true;
-}
-
-int CountPrime(int start, int end)
-{
-	int count = 0;
-	for (int number = start; number <= end; ++number)
-	{
-		if(IsPrime(number))
-		{
-			++count;
-		}
-	}
-
-	return count;
-}
-
-// 1과 자기 자신으로만 나뉘면 그걸 소수라고 함.
+using MissileRef = TSharedPtr<Missile>;
 
 int main()
 {
-	const int MAX_NUMBER = 10000;
-	// 1~MAX_NUMBER까지의 소수 개수
+	WraithRef wraith = new Wraith();
+	wraith->ReleaseRef();
+	MissileRef missile = new Missile();
+	missile->ReleaseRef();
 
-	CountPrime(1, MAX_NUMBER);
-	vector<thread> threads;
+	missile->SetTarget(wraith);
 
-	int coreCount = thread::hardware_concurrency();
-	int jobCount = (MAX_NUMBER / coreCount) + 1;
+	wraith->Hp = 0;
+	wraith = nullptr;
 
-	atomic<int> primeCount = 0;
-	for (int i = 0; i < coreCount; ++i)
+	while (true)
 	{
-		int start = i * jobCount + 1;
-		int end = min(MAX_NUMBER, (i + 1) * jobCount);
-
-		threads.push_back(thread([start, end, &primeCount]()
+		if (missile)
+		{
+			if (missile->Update())
 			{
-				primeCount += CountPrime(start, end);
-			}));
+				missile = nullptr;
+			}
+		}
 	}
 
-	for (thread& t : threads)
-	{
-		t.join();
-	}
-
-	cout << primeCount << endl;
 }
-
