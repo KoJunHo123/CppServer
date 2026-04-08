@@ -9,68 +9,34 @@
 #include "ThreadManager.h"
 #include "RefCounting.h"
 
-
-class Wraith : public RefCountable
+class Player
 {
 public:
-	int Hp = 150;
-	int PosX = 0;
-	int PosY = 0;
-};
-using WraithRef = TSharedPtr<Wraith>;
-
-class Missile : public RefCountable
-{
-public:
-	void SetTarget(WraithRef target)
+	Player()
 	{
-		Target = target;
 	}
 
-	bool Update()
+	void AddGold(int amount)
 	{
-		if (nullptr == Target)
-		{
-			return true;
-		}
+		WRITE_LOCK; // Locks[0]에 대한 write lock
 
-		int posX = Target->PosX;
-		int oisY = Target->PosY;
-
-		if (0 == Target->Hp)
-		{
-			Target = nullptr;
-			return true;
-		}
-		return false;
+		m_gold += amount;
 	}
 
-	WraithRef Target = nullptr;
-};
+	int GetGold()
+	{
+		READ_LOCK; // Locks[0]에 대한 read lock
 
-using MissileRef = TSharedPtr<Missile>;
+		return m_gold;
+	}
+
+private:
+	USE_LOCK; // Lock Locks[1];
+
+	int m_gold = 0;
+};
 
 int main()
 {
-	WraithRef wraith = new Wraith();
-	wraith->ReleaseRef();
-	MissileRef missile = new Missile();
-	missile->ReleaseRef();
-
-	missile->SetTarget(wraith);
-
-	wraith->Hp = 0;
-	wraith = nullptr;
-
-	while (true)
-	{
-		if (missile)
-		{
-			if (missile->Update())
-			{
-				missile = nullptr;
-			}
-		}
-	}
-
+	
 }

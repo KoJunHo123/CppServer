@@ -10,8 +10,8 @@
 class DeadLockProfiler
 {
 public:
-	void PushLock(const char* name);
-	void PopLock(const char* name);
+	void PushLock(const char* InName);
+	void PopLock(const char* InName);
 	void CheckCycle();
 
 private:
